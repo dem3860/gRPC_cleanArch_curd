@@ -1,7 +1,7 @@
-## クリーンアーキテクチャで REST API を実装してみる
+## クリーンアーキテクチャ構成で gPRC の CRUD を実装してみる
 
-このプロジェクトでは、Hono + Prisma + neverThrow を用いてイベントの CRUD を実装し、クリーンアーキテクチャに基づいた設計を体験・学習します。  
-また、業務で gRPC や GraphQL を使用する機会があったため、それらと REST API の設計・依存関係の違いを比較する目的も含まれています。
+このプロジェクトでは、gRPC + Prisma + neverThrow を用いてイベントの CRUD を実装し、クリーンアーキテクチャに基づいた設計を体験・学習します。  
+以前にあげた REST API と比較してみてください。
 
 ---
 
@@ -47,29 +47,29 @@ npx prisma studio
 
 ---
 
-### ディレクトリ構成
+### proto ファイルからコードの自動生成
 
-```
-src/
-├── adapter/                 # 外部との接点。HTTPハンドラやDB接続など
-│   ├── handler/             # Hono を使ったルーティング、リクエスト処理
-│   ├── repository/          # Prisma を使ったDBアクセスの実装
-│   └── schema/              # Zod によるAPIの入出力スキーマ定義（OpenAPI連携）
-│
-├── domain/                  # アプリケーションの中心的なビジネスルール
-│   ├── entity/              # Entity（ドメインモデル）
-│   ├── constructor/         # Entityの生成・バリデーションロジック
-│
-├── useCase/                 # ユースケースの実装（ビジネスロジックの具体化）
-│   ├── inputPort/           # ユースケースを外部に公開するインターフェース
-│   ├── outputPort/          # ユースケースが依存する外部との接点（Repositoryなど）のインターフェース
-│   └── interactor/          # ユースケースの実装クラス（Interactor）
-│
-├── type.ts                  # Hono の Context に渡す型（AppType）など
-└── index.ts                 # エントリーポイント（サーバー起動）
+本プロジェクトでは、gRPC を使用してサービスを実装しており、proto ファイルはイベントに関する gRPC サービス定義を行うために使用しています。
+
+具体的には、proto/event.proto ファイルにイベント作成のためのリクエストとレスポンスを定義し、それを元に gRPC クライアントとサーバー間で通信します。
+
+proto ファイルを変更した後は、以下のコマンドを実行して自動的に TypeScript の型を生成します。
+
+```bash
+npm run codegen
 ```
 
----
+### 動作確認
+
+swagger のような GUI ツールを見つけられなかったので server に対してリクエストを送り、そのレスポンスを確認することで動作確認とします。
+
+client.ts ファイルがリクエストを送る部分に該当します。
+
+どの機能に対してリクエストを送るか、そしてリクエストの内容を記載し、以下のコマンドを実行してください。
+
+```bash
+npm run client
+```
 
 ### クリーンアーキテクチャにおける interface の役割
 
@@ -84,7 +84,7 @@ src/
 
 ### SOLID 原則との対応
 
-- **単一責任の原則**：handler, interactor, repository, schema など各層で責務が明確に分離されています。
+- **単一責任の原則**：handler, interactor, repository など各層で責務が明確に分離されています。
 - **オープン・クローズド原則**：Interactor や Repository の実装を差し替えても他層に影響を与えずに拡張できます。
 - **リスコフの置換原則**：IEventRepository や IEventUseCase などのインターフェースを満たす実装であれば入れ替え可能です。
 - **インターフェース分離の原則**：必要最小限のメソッドのみを持つ小さなインターフェースに分離されています。
