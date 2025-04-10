@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  grpc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "50051:50051"
+    depends_on:
+      pg:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@pg:5432/postgres?schema=public
+    entrypoint: >
+      /bin/sh -c "
+      npx prisma migrate dev --name init;
+      npx prisma db seed.js;
+      node dist/src/server.js
+      "
+
+  pg:
+    image: postgres:16
+    platform: linux/amd64
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./mnt/pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 5s
+      retries: 5

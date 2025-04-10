@@ -1,0 +1,35 @@
+{
+  "name": "grpc-event-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "cross-env TZ=UTC tsx watch --env-file=.env src/server.ts",
+    "build": "tsc",
+    "client": "tsx src/client.ts",
+    "generate": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "seed": "tsx src/script/seed.ts",
+    "codegen": "protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=src/adapter/grpc/generated --ts_proto_opt=esModuleInterop=true,forceLong=string,useOptionals=messages -I ./proto proto/*.proto"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.13.2",
+    "@grpc/proto-loader": "^0.7.13",
+    "@prisma/client": "^6.6.0",
+    "dotenv": "^16.4.7",
+    "neverthrow": "^8.2.0",
+    "prisma": "^6.6.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "ts-node": "^10.9.2",
+    "ts-proto": "^2.7.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
+  }
+}
