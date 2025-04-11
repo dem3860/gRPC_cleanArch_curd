@@ -14,7 +14,9 @@ export const eventHandler = (
   eventUseCase: IEventUseCase
 ): UntypedServiceImplementation => ({
   CreateEvent(
+    // ServerUnaryCall: gRPCのリクエストを受け取るための型.単一のリクエストとレスポンスを処理する際のリクエストオブジェクト.serverにリクエストが送られるとそれがServerUnaryCallオブジェクトとして渡される
     call: ServerUnaryCall<CreateEventRequest, EventResponse>,
+    // sendUnaryData: gRPCのレスポンスを返すための型.レスポンスを返すためのコールバック関数
     callback: sendUnaryData<EventResponse>
   ) {
     const request = call.request;
