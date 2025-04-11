@@ -26,6 +26,10 @@ export interface UpdateEventRequest {
   location: string;
 }
 
+export interface DeleteEventRequest {
+  id: string;
+}
+
 export interface EventResponse {
   id: string;
   name: string;
@@ -35,6 +39,10 @@ export interface EventResponse {
   location: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface DeleteEventResponse {
+  message: string;
 }
 
 function createBaseCreateEventRequest(): CreateEventRequest {
@@ -301,6 +309,64 @@ export const UpdateEventRequest: MessageFns<UpdateEventRequest> = {
   },
 };
 
+function createBaseDeleteEventRequest(): DeleteEventRequest {
+  return { id: "" };
+}
+
+export const DeleteEventRequest: MessageFns<DeleteEventRequest> = {
+  encode(message: DeleteEventRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): DeleteEventRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDeleteEventRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): DeleteEventRequest {
+    return { id: isSet(object.id) ? globalThis.String(object.id) : "" };
+  },
+
+  toJSON(message: DeleteEventRequest): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<DeleteEventRequest>, I>>(base?: I): DeleteEventRequest {
+    return DeleteEventRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<DeleteEventRequest>, I>>(object: I): DeleteEventRequest {
+    const message = createBaseDeleteEventRequest();
+    message.id = object.id ?? "";
+    return message;
+  },
+};
+
 function createBaseEventResponse(): EventResponse {
   return { id: "", name: "", description: "", startDate: "", endDate: "", location: "", createdAt: "", updatedAt: "" };
 }
@@ -473,9 +539,68 @@ export const EventResponse: MessageFns<EventResponse> = {
   },
 };
 
+function createBaseDeleteEventResponse(): DeleteEventResponse {
+  return { message: "" };
+}
+
+export const DeleteEventResponse: MessageFns<DeleteEventResponse> = {
+  encode(message: DeleteEventResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.message !== "") {
+      writer.uint32(10).string(message.message);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): DeleteEventResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDeleteEventResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.message = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): DeleteEventResponse {
+    return { message: isSet(object.message) ? globalThis.String(object.message) : "" };
+  },
+
+  toJSON(message: DeleteEventResponse): unknown {
+    const obj: any = {};
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<DeleteEventResponse>, I>>(base?: I): DeleteEventResponse {
+    return DeleteEventResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<DeleteEventResponse>, I>>(object: I): DeleteEventResponse {
+    const message = createBaseDeleteEventResponse();
+    message.message = object.message ?? "";
+    return message;
+  },
+};
+
 export interface EventService {
   CreateEvent(request: CreateEventRequest): Promise<EventResponse>;
   UpdateEvent(request: UpdateEventRequest): Promise<EventResponse>;
+  DeleteEvent(request: DeleteEventRequest): Promise<DeleteEventResponse>;
 }
 
 export const EventServiceServiceName = "event.EventService";
@@ -487,6 +612,7 @@ export class EventServiceClientImpl implements EventService {
     this.rpc = rpc;
     this.CreateEvent = this.CreateEvent.bind(this);
     this.UpdateEvent = this.UpdateEvent.bind(this);
+    this.DeleteEvent = this.DeleteEvent.bind(this);
   }
   CreateEvent(request: CreateEventRequest): Promise<EventResponse> {
     const data = CreateEventRequest.encode(request).finish();
@@ -498,6 +624,12 @@ export class EventServiceClientImpl implements EventService {
     const data = UpdateEventRequest.encode(request).finish();
     const promise = this.rpc.request(this.service, "UpdateEvent", data);
     return promise.then((data) => EventResponse.decode(new BinaryReader(data)));
+  }
+
+  DeleteEvent(request: DeleteEventRequest): Promise<DeleteEventResponse> {
+    const data = DeleteEventRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "DeleteEvent", data);
+    return promise.then((data) => DeleteEventResponse.decode(new BinaryReader(data)));
   }
 }
 

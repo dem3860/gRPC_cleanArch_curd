@@ -6,6 +6,8 @@ import {
 import { IEventUseCase } from "../../../useCase/inputPort/event";
 import {
   CreateEventRequest,
+  DeleteEventRequest,
+  DeleteEventResponse,
   EventResponse,
   UpdateEventRequest,
 } from "../generated/event";
@@ -81,6 +83,25 @@ export const eventHandler = (
           location: event.location,
           createdAt: event.createdAt.toISOString(),
           updatedAt: event.updatedAt.toISOString(),
+        });
+      });
+  },
+  DeleteEvent(
+    input: ServerUnaryCall<DeleteEventRequest, DeleteEventResponse>,
+    callback: sendUnaryData<DeleteEventResponse>
+  ) {
+    const request = input.request;
+    console.log("gRPC Delete request:", request);
+    eventUseCase
+      .delete(request.id)
+      .mapErr((err) => {
+        const error = new Error(err.message);
+        (error as any).code = 13; // INTERNAL_ERROR
+        callback(error, null);
+      })
+      .map(() => {
+        callback(null, {
+          message: "Event deleted successfully",
         });
       });
   },

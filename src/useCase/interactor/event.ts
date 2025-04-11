@@ -55,4 +55,7 @@ export class EventInteractor implements IEventUseCase {
       return this.eventRepo.findById(event.id);
     });
   }
+  delete(id: string): ResultAsync<void, DBError> {
+    return this.eventRepo.delete(id);
+  }
 }
