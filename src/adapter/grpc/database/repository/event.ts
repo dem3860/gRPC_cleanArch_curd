@@ -26,6 +26,24 @@ export class EventRepository implements IEventRepository {
     });
   }
 
+  update(input: Event): ResultAsync<void, DBError> {
+    return fromPromise(
+      prisma.event.update({
+        where: { id: input.id },
+        data: {
+          name: input.name,
+          description: input.description,
+          startDate: input.startDate,
+          endDate: input.endDate,
+          location: input.location,
+        },
+      }),
+      (e) => new DBError("Failed to create event")
+    ).map(() => {
+      return;
+    });
+  }
+
   findById(id: string): ResultAsync<Event, DBError> {
     console.log("findById", id);
     return fromPromise(

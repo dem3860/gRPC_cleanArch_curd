@@ -22,14 +22,33 @@ const client = new proto.event.EventService(
   grpc.credentials.createInsecure()
 );
 
+// // CreateEvent の動作確認
+// client.CreateEvent(
+//   {
+//     name: "gRPCイベント",
+//     description: "これはgRPCで作成されたイベントです",
+//     startDate: new Date("2025-05-01T10:00:00Z").toISOString(),
+//     endDate: new Date("2025-05-01T12:00:00Z").toISOString(),
+//     location: "東京",
+//   },
+//   (err: any, response: EventResponse) => {
+//     if (err) {
+//       console.error("❌ Error:", err);
+//     } else {
+//       console.log("✅ Response:", response);
+//     }
+//   }
+// );
+
 // CreateEvent の動作確認
-client.CreateEvent(
+client.UpdateEvent(
   {
-    name: "gRPCイベント",
-    description: "これはgRPCで作成されたイベントです",
+    id: "11111111-1111-1111-1111-446655440000",
+    name: "newのgRPCイベント",
+    description: "これは更新されたgRPCで作成されたイベントです",
     startDate: new Date("2025-05-01T10:00:00Z").toISOString(),
     endDate: new Date("2025-05-01T12:00:00Z").toISOString(),
-    location: "東京",
+    location: "東京2",
   },
   (err: any, response: EventResponse) => {
     if (err) {

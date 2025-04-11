@@ -4,6 +4,7 @@ package event;
 
 service EventService {
   rpc CreateEvent (CreateEventRequest) returns (EventResponse);
+  rpc UpdateEvent (UpdateEventRequest) returns (EventResponse);
 }
 
 message CreateEventRequest {
@@ -12,6 +13,15 @@ message CreateEventRequest {
   string startDate = 3;
   string endDate = 4;
   string location = 5;
+}
+
+message UpdateEventRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string startDate = 4;
+  string endDate = 5;
+  string location = 6;
 }
 
 message EventResponse {

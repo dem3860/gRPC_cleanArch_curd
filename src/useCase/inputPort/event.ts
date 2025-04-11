@@ -14,8 +14,21 @@ export const EventCreateRequest = z.object({
 });
 export type EventCreateRequest = z.infer<typeof EventCreateRequest>;
 
+export const EventUpdateRequest = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  startDate: z.string().datetime(),
+  endDate: z.string().datetime(),
+  location: z.string(),
+});
+export type EventUpdateRequest = z.infer<typeof EventUpdateRequest>;
+
 export interface IEventUseCase {
   create(
     input: EventCreateRequest
+  ): ResultAsync<Event, ValidationError | DBError>;
+  update(
+    input: EventUpdateRequest
   ): ResultAsync<Event, ValidationError | DBError>;
 }

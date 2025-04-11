@@ -4,7 +4,11 @@ import {
   UntypedServiceImplementation,
 } from "@grpc/grpc-js";
 import { IEventUseCase } from "../../../useCase/inputPort/event";
-import { CreateEventRequest, EventResponse } from "../generated/event";
+import {
+  CreateEventRequest,
+  EventResponse,
+  UpdateEventRequest,
+} from "../generated/event";
 
 export const eventHandler = (
   eventUseCase: IEventUseCase
@@ -17,24 +21,20 @@ export const eventHandler = (
 
     console.log("gRPC request:", request);
 
-    Promise.resolve(
-      eventUseCase.create({
+    eventUseCase
+      .create({
         name: request.name,
         description: request.description,
         startDate: request.startDate,
         endDate: request.endDate,
         location: request.location,
       })
-    )
-      .then((result) => {
-        if (result.isErr()) {
-          const error = new Error(result.error.message);
-          (error as any).code = 13; // INTERNAL_ERROR
-          callback(error, null);
-          return;
-        }
-
-        const event = result.value;
+      .mapErr((err) => {
+        const error = new Error(err.message);
+        (error as any).code = 13; // INTERNAL_ERROR
+        callback(error, null);
+      })
+      .map((event) => {
         callback(null, {
           id: event.id,
           name: event.name,
@@ -45,11 +45,41 @@ export const eventHandler = (
           createdAt: event.createdAt.toISOString(),
           updatedAt: event.updatedAt.toISOString(),
         });
+      });
+  },
+
+  UpdateEvent(
+    call: ServerUnaryCall<UpdateEventRequest, EventResponse>,
+    callback: sendUnaryData<EventResponse>
+  ) {
+    const request = call.request;
+    console.log("gRPC Update request:", request);
+
+    eventUseCase
+      .update({
+        id: request.id,
+        name: request.name,
+        description: request.description,
+        startDate: request.startDate,
+        endDate: request.endDate,
+        location: request.location,
       })
-      .catch((err) => {
-        const error = new Error("Unexpected error");
+      .mapErr((err) => {
+        const error = new Error(err.message);
         (error as any).code = 13;
         callback(error, null);
+      })
+      .map((event) => {
+        callback(null, {
+          id: event.id,
+          name: event.name,
+          description: event.description,
+          startDate: event.startDate.toISOString(),
+          endDate: event.endDate.toISOString(),
+          location: event.location,
+          createdAt: event.createdAt.toISOString(),
+          updatedAt: event.updatedAt.toISOString(),
+        });
       });
   },
 });

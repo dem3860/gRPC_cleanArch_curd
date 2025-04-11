@@ -17,6 +17,15 @@ export interface CreateEventRequest {
   location: string;
 }
 
+export interface UpdateEventRequest {
+  id: string;
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  location: string;
+}
+
 export interface EventResponse {
   id: string;
   name: string;
@@ -143,6 +152,146 @@ export const CreateEventRequest: MessageFns<CreateEventRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<CreateEventRequest>, I>>(object: I): CreateEventRequest {
     const message = createBaseCreateEventRequest();
+    message.name = object.name ?? "";
+    message.description = object.description ?? "";
+    message.startDate = object.startDate ?? "";
+    message.endDate = object.endDate ?? "";
+    message.location = object.location ?? "";
+    return message;
+  },
+};
+
+function createBaseUpdateEventRequest(): UpdateEventRequest {
+  return { id: "", name: "", description: "", startDate: "", endDate: "", location: "" };
+}
+
+export const UpdateEventRequest: MessageFns<UpdateEventRequest> = {
+  encode(message: UpdateEventRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.name !== "") {
+      writer.uint32(18).string(message.name);
+    }
+    if (message.description !== "") {
+      writer.uint32(26).string(message.description);
+    }
+    if (message.startDate !== "") {
+      writer.uint32(34).string(message.startDate);
+    }
+    if (message.endDate !== "") {
+      writer.uint32(42).string(message.endDate);
+    }
+    if (message.location !== "") {
+      writer.uint32(50).string(message.location);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): UpdateEventRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUpdateEventRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.description = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.startDate = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.endDate = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.location = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): UpdateEventRequest {
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      name: isSet(object.name) ? globalThis.String(object.name) : "",
+      description: isSet(object.description) ? globalThis.String(object.description) : "",
+      startDate: isSet(object.startDate) ? globalThis.String(object.startDate) : "",
+      endDate: isSet(object.endDate) ? globalThis.String(object.endDate) : "",
+      location: isSet(object.location) ? globalThis.String(object.location) : "",
+    };
+  },
+
+  toJSON(message: UpdateEventRequest): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.name !== "") {
+      obj.name = message.name;
+    }
+    if (message.description !== "") {
+      obj.description = message.description;
+    }
+    if (message.startDate !== "") {
+      obj.startDate = message.startDate;
+    }
+    if (message.endDate !== "") {
+      obj.endDate = message.endDate;
+    }
+    if (message.location !== "") {
+      obj.location = message.location;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<UpdateEventRequest>, I>>(base?: I): UpdateEventRequest {
+    return UpdateEventRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<UpdateEventRequest>, I>>(object: I): UpdateEventRequest {
+    const message = createBaseUpdateEventRequest();
+    message.id = object.id ?? "";
     message.name = object.name ?? "";
     message.description = object.description ?? "";
     message.startDate = object.startDate ?? "";
@@ -326,6 +475,7 @@ export const EventResponse: MessageFns<EventResponse> = {
 
 export interface EventService {
   CreateEvent(request: CreateEventRequest): Promise<EventResponse>;
+  UpdateEvent(request: UpdateEventRequest): Promise<EventResponse>;
 }
 
 export const EventServiceServiceName = "event.EventService";
@@ -336,10 +486,17 @@ export class EventServiceClientImpl implements EventService {
     this.service = opts?.service || EventServiceServiceName;
     this.rpc = rpc;
     this.CreateEvent = this.CreateEvent.bind(this);
+    this.UpdateEvent = this.UpdateEvent.bind(this);
   }
   CreateEvent(request: CreateEventRequest): Promise<EventResponse> {
     const data = CreateEventRequest.encode(request).finish();
     const promise = this.rpc.request(this.service, "CreateEvent", data);
+    return promise.then((data) => EventResponse.decode(new BinaryReader(data)));
+  }
+
+  UpdateEvent(request: UpdateEventRequest): Promise<EventResponse> {
+    const data = UpdateEventRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "UpdateEvent", data);
     return promise.then((data) => EventResponse.decode(new BinaryReader(data)));
   }
 }
