@@ -6,6 +6,7 @@ service EventService {
   rpc CreateEvent (CreateEventRequest) returns (EventResponse);
   rpc UpdateEvent (UpdateEventRequest) returns (EventResponse);
   rpc DeleteEvent (DeleteEventRequest) returns (DeleteEventResponse);
+  rpc ListEvent (ListEventRequest) returns (ListEventResponse);
 }
 
 message CreateEventRequest {
@@ -29,6 +30,26 @@ message DeleteEventRequest {
   string id = 1;
 }
 
+message ListEventRequest {
+  enum Order {
+    asc = 0;
+    desc = 1;
+  }
+  enum OrderBy {
+    startDate = 0;
+    endDate = 1;
+    name = 2;
+    createdAt = 3;
+  }
+  string q = 1;
+  string start = 2;
+  string end = 3;
+  Order order = 4;
+  OrderBy orderBy = 5;
+  int32 page = 6;
+  int32 limit = 7;
+}
+
 message EventResponse {
   string id = 1;
   string name = 2;
@@ -42,4 +63,9 @@ message EventResponse {
 
 message DeleteEventResponse {
   string message = 1;
+}
+
+message ListEventResponse {
+  repeated EventResponse events = 1;
+  int32 total = 2;
 }

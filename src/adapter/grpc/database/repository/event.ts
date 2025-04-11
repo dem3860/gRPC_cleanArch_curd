@@ -3,7 +3,7 @@ import { ResultAsync, fromPromise } from "neverthrow";
 import { PrismaClient } from "@prisma/client";
 import { IEventRepository } from "../../../../useCase/outputPort/event";
 import { DBError } from "../../../../domain/entity/error";
-import { Event } from "../../../../domain/entity/event";
+import { Event, EventList, EventSearch } from "../../../../domain/entity/event";
 
 const prisma = new PrismaClient();
 
@@ -65,6 +65,50 @@ export class EventRepository implements IEventRepository {
           location: result.location,
           createdAt: result.createdAt,
           updatedAt: result.updatedAt,
+        }),
+        () => new DBError("Mapping error")
+      );
+    });
+  }
+  list(input: EventSearch): ResultAsync<EventList, DBError> {
+    return fromPromise(
+      prisma.event.findMany({
+        where: {
+          name: {
+            contains: input.q,
+            mode: "insensitive",
+          },
+          startDate: {
+            gte: input.startDate,
+            lte: input.endDate,
+          },
+        },
+        orderBy: {
+          [input.orderBy || "startDate"]: input.order || "asc",
+        },
+        skip: (input.page || 0) * (input.limit || 10),
+        take: input.limit || 10,
+      }),
+      (e) => new DBError("Failed to list events")
+    ).andThen((result) => {
+      if (!result) {
+        return ResultAsync.fromSafePromise(
+          Promise.reject(new DBError("Event not found"))
+        );
+      }
+      return ResultAsync.fromPromise(
+        Promise.resolve({
+          events: result.map((event) => ({
+            id: event.id,
+            name: event.name,
+            description: event.description,
+            startDate: event.startDate,
+            endDate: event.endDate,
+            location: event.location,
+            createdAt: event.createdAt,
+            updatedAt: event.updatedAt,
+          })),
+          total: result.length,
         }),
         () => new DBError("Mapping error")
       );

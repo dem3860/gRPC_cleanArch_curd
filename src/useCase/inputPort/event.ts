@@ -1,6 +1,6 @@
 // useCase/inputPort/event.ts
 import { ResultAsync } from "neverthrow";
-import { Event } from "../../domain/entity/event";
+import { Event, EventList } from "../../domain/entity/event";
 import { DBError, ValidationError } from "../../domain/entity/error";
 import { z } from "zod";
 
@@ -24,6 +24,19 @@ export const EventUpdateRequest = z.object({
 });
 export type EventUpdateRequest = z.infer<typeof EventUpdateRequest>;
 
+export const EventListRequest = z.object({
+  q: z.string().optional(),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+  order: z.enum(["asc", "desc"]).default("asc"),
+  orderBy: z
+    .enum(["startDate", "endDate", "name", "createdAt"])
+    .default("createdAt"),
+  page: z.number().optional(),
+  limit: z.number().optional(),
+});
+export type EventListRequest = z.infer<typeof EventListRequest>;
+
 export interface IEventUseCase {
   create(
     input: EventCreateRequest
@@ -32,4 +45,5 @@ export interface IEventUseCase {
     input: EventUpdateRequest
   ): ResultAsync<Event, ValidationError | DBError>;
   delete(id: string): ResultAsync<void, DBError>;
+  list(input: EventListRequest): ResultAsync<EventList, DBError>;
 }

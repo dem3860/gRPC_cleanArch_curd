@@ -1,7 +1,10 @@
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import path from "path";
-import { EventResponse } from "./adapter/grpc/generated/event";
+import {
+  EventResponse,
+  ListEventResponse,
+} from "./adapter/grpc/generated/event";
 
 // protoファイルのパス
 const PROTO_PATH = path.resolve("proto/event.proto");
@@ -59,12 +62,26 @@ const client = new proto.event.EventService(
 //   }
 // );
 
+// // DeleteEvent の動作確認
+// client.DeleteEvent(
+//   {
+//     id: "f0ce6d21-5464-47e5-9595-c29e795c61b9",
+//   },
+//   (err: any, response: EventResponse) => {
+//     if (err) {
+//       console.error("❌ Error:", err);
+//     } else {
+//       console.log("✅ Response:", response);
+//     }
+//   }
+// );
+
 // DeleteEvent の動作確認
-client.DeleteEvent(
+client.ListEvent(
   {
-    id: "f0ce6d21-5464-47e5-9595-c29e795c61b9",
+    q: "gRPCイベント",
   },
-  (err: any, response: EventResponse) => {
+  (err: any, response: ListEventResponse) => {
     if (err) {
       console.error("❌ Error:", err);
     } else {

@@ -30,6 +30,94 @@ export interface DeleteEventRequest {
   id: string;
 }
 
+export interface ListEventRequest {
+  q: string;
+  start: string;
+  end: string;
+  order: ListEventRequest_Order;
+  orderBy: ListEventRequest_OrderBy;
+  page: number;
+  limit: number;
+}
+
+export enum ListEventRequest_Order {
+  asc = 0,
+  desc = 1,
+  UNRECOGNIZED = -1,
+}
+
+export function listEventRequest_OrderFromJSON(object: any): ListEventRequest_Order {
+  switch (object) {
+    case 0:
+    case "asc":
+      return ListEventRequest_Order.asc;
+    case 1:
+    case "desc":
+      return ListEventRequest_Order.desc;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return ListEventRequest_Order.UNRECOGNIZED;
+  }
+}
+
+export function listEventRequest_OrderToJSON(object: ListEventRequest_Order): string {
+  switch (object) {
+    case ListEventRequest_Order.asc:
+      return "asc";
+    case ListEventRequest_Order.desc:
+      return "desc";
+    case ListEventRequest_Order.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
+export enum ListEventRequest_OrderBy {
+  startDate = 0,
+  endDate = 1,
+  name = 2,
+  createdAt = 3,
+  UNRECOGNIZED = -1,
+}
+
+export function listEventRequest_OrderByFromJSON(object: any): ListEventRequest_OrderBy {
+  switch (object) {
+    case 0:
+    case "startDate":
+      return ListEventRequest_OrderBy.startDate;
+    case 1:
+    case "endDate":
+      return ListEventRequest_OrderBy.endDate;
+    case 2:
+    case "name":
+      return ListEventRequest_OrderBy.name;
+    case 3:
+    case "createdAt":
+      return ListEventRequest_OrderBy.createdAt;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return ListEventRequest_OrderBy.UNRECOGNIZED;
+  }
+}
+
+export function listEventRequest_OrderByToJSON(object: ListEventRequest_OrderBy): string {
+  switch (object) {
+    case ListEventRequest_OrderBy.startDate:
+      return "startDate";
+    case ListEventRequest_OrderBy.endDate:
+      return "endDate";
+    case ListEventRequest_OrderBy.name:
+      return "name";
+    case ListEventRequest_OrderBy.createdAt:
+      return "createdAt";
+    case ListEventRequest_OrderBy.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
 export interface EventResponse {
   id: string;
   name: string;
@@ -43,6 +131,11 @@ export interface EventResponse {
 
 export interface DeleteEventResponse {
   message: string;
+}
+
+export interface ListEventResponse {
+  events: EventResponse[];
+  total: number;
 }
 
 function createBaseCreateEventRequest(): CreateEventRequest {
@@ -367,6 +460,162 @@ export const DeleteEventRequest: MessageFns<DeleteEventRequest> = {
   },
 };
 
+function createBaseListEventRequest(): ListEventRequest {
+  return { q: "", start: "", end: "", order: 0, orderBy: 0, page: 0, limit: 0 };
+}
+
+export const ListEventRequest: MessageFns<ListEventRequest> = {
+  encode(message: ListEventRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.q !== "") {
+      writer.uint32(10).string(message.q);
+    }
+    if (message.start !== "") {
+      writer.uint32(18).string(message.start);
+    }
+    if (message.end !== "") {
+      writer.uint32(26).string(message.end);
+    }
+    if (message.order !== 0) {
+      writer.uint32(32).int32(message.order);
+    }
+    if (message.orderBy !== 0) {
+      writer.uint32(40).int32(message.orderBy);
+    }
+    if (message.page !== 0) {
+      writer.uint32(48).int32(message.page);
+    }
+    if (message.limit !== 0) {
+      writer.uint32(56).int32(message.limit);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ListEventRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseListEventRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.q = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.start = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.end = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.order = reader.int32() as any;
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.orderBy = reader.int32() as any;
+          continue;
+        }
+        case 6: {
+          if (tag !== 48) {
+            break;
+          }
+
+          message.page = reader.int32();
+          continue;
+        }
+        case 7: {
+          if (tag !== 56) {
+            break;
+          }
+
+          message.limit = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ListEventRequest {
+    return {
+      q: isSet(object.q) ? globalThis.String(object.q) : "",
+      start: isSet(object.start) ? globalThis.String(object.start) : "",
+      end: isSet(object.end) ? globalThis.String(object.end) : "",
+      order: isSet(object.order) ? listEventRequest_OrderFromJSON(object.order) : 0,
+      orderBy: isSet(object.orderBy) ? listEventRequest_OrderByFromJSON(object.orderBy) : 0,
+      page: isSet(object.page) ? globalThis.Number(object.page) : 0,
+      limit: isSet(object.limit) ? globalThis.Number(object.limit) : 0,
+    };
+  },
+
+  toJSON(message: ListEventRequest): unknown {
+    const obj: any = {};
+    if (message.q !== "") {
+      obj.q = message.q;
+    }
+    if (message.start !== "") {
+      obj.start = message.start;
+    }
+    if (message.end !== "") {
+      obj.end = message.end;
+    }
+    if (message.order !== 0) {
+      obj.order = listEventRequest_OrderToJSON(message.order);
+    }
+    if (message.orderBy !== 0) {
+      obj.orderBy = listEventRequest_OrderByToJSON(message.orderBy);
+    }
+    if (message.page !== 0) {
+      obj.page = Math.round(message.page);
+    }
+    if (message.limit !== 0) {
+      obj.limit = Math.round(message.limit);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ListEventRequest>, I>>(base?: I): ListEventRequest {
+    return ListEventRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ListEventRequest>, I>>(object: I): ListEventRequest {
+    const message = createBaseListEventRequest();
+    message.q = object.q ?? "";
+    message.start = object.start ?? "";
+    message.end = object.end ?? "";
+    message.order = object.order ?? 0;
+    message.orderBy = object.orderBy ?? 0;
+    message.page = object.page ?? 0;
+    message.limit = object.limit ?? 0;
+    return message;
+  },
+};
+
 function createBaseEventResponse(): EventResponse {
   return { id: "", name: "", description: "", startDate: "", endDate: "", location: "", createdAt: "", updatedAt: "" };
 }
@@ -597,10 +846,87 @@ export const DeleteEventResponse: MessageFns<DeleteEventResponse> = {
   },
 };
 
+function createBaseListEventResponse(): ListEventResponse {
+  return { events: [], total: 0 };
+}
+
+export const ListEventResponse: MessageFns<ListEventResponse> = {
+  encode(message: ListEventResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.events) {
+      EventResponse.encode(v!, writer.uint32(10).fork()).join();
+    }
+    if (message.total !== 0) {
+      writer.uint32(16).int32(message.total);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ListEventResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseListEventResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.events.push(EventResponse.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.total = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ListEventResponse {
+    return {
+      events: globalThis.Array.isArray(object?.events) ? object.events.map((e: any) => EventResponse.fromJSON(e)) : [],
+      total: isSet(object.total) ? globalThis.Number(object.total) : 0,
+    };
+  },
+
+  toJSON(message: ListEventResponse): unknown {
+    const obj: any = {};
+    if (message.events?.length) {
+      obj.events = message.events.map((e) => EventResponse.toJSON(e));
+    }
+    if (message.total !== 0) {
+      obj.total = Math.round(message.total);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ListEventResponse>, I>>(base?: I): ListEventResponse {
+    return ListEventResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ListEventResponse>, I>>(object: I): ListEventResponse {
+    const message = createBaseListEventResponse();
+    message.events = object.events?.map((e) => EventResponse.fromPartial(e)) || [];
+    message.total = object.total ?? 0;
+    return message;
+  },
+};
+
 export interface EventService {
   CreateEvent(request: CreateEventRequest): Promise<EventResponse>;
   UpdateEvent(request: UpdateEventRequest): Promise<EventResponse>;
   DeleteEvent(request: DeleteEventRequest): Promise<DeleteEventResponse>;
+  ListEvent(request: ListEventRequest): Promise<ListEventResponse>;
 }
 
 export const EventServiceServiceName = "event.EventService";
@@ -613,6 +939,7 @@ export class EventServiceClientImpl implements EventService {
     this.CreateEvent = this.CreateEvent.bind(this);
     this.UpdateEvent = this.UpdateEvent.bind(this);
     this.DeleteEvent = this.DeleteEvent.bind(this);
+    this.ListEvent = this.ListEvent.bind(this);
   }
   CreateEvent(request: CreateEventRequest): Promise<EventResponse> {
     const data = CreateEventRequest.encode(request).finish();
@@ -630,6 +957,12 @@ export class EventServiceClientImpl implements EventService {
     const data = DeleteEventRequest.encode(request).finish();
     const promise = this.rpc.request(this.service, "DeleteEvent", data);
     return promise.then((data) => DeleteEventResponse.decode(new BinaryReader(data)));
+  }
+
+  ListEvent(request: ListEventRequest): Promise<ListEventResponse> {
+    const data = ListEventRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ListEvent", data);
+    return promise.then((data) => ListEventResponse.decode(new BinaryReader(data)));
   }
 }
 
